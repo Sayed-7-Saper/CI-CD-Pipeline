@@ -10,19 +10,18 @@ pipeline {
     stages {
         stage('Authenticate with Docker Hub') {
             steps {
-                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | sudo docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+              sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
                
             }
         }
 
         stage('Build and Push Docker Image') {
             steps {
-                script {
-                    docker.build(env.DOCKER_IMAGE_NAME, '-f Dockerfile .')
-                    docker.withRegistry('https://registry-1.docker.io', 'dockerhub-credentials') {
-                        docker.image(env.DOCKER_IMAGE_NAME).push()
-                    }
-                }
+                sh"""
+                docker build -t nodeapp_test:latest .
+                docker tag  nodeapp_test:latest 10103040/test-nodejs:latest
+                docker push 10103040/test-nodejs:latest
+                """
             }
         }
 
