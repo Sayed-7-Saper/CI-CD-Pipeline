@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_HUB_CREDENTIALS = 'docker-hub'
+        DOCKERHUB_CREDENTIALS = credentials('docker-hub')
         SONARQUBE_CREDENTIALS = 'your-sonarqube-credentials-id'
         DOCKER_IMAGE_NAME = '10103040/test-nodejs '
     }
@@ -10,13 +10,8 @@ pipeline {
     stages {
         stage('Authenticate with Docker Hub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: env.DOCKER_HUB_CREDENTIALS, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    script {
-                        docker.withRegistry('https://registry-1.docker.io', 'docker-hub-credentials') {
-                            // Authentication successful
-                        }
-                    }
-                }
+                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+               
             }
         }
 
@@ -24,7 +19,7 @@ pipeline {
             steps {
                 script {
                     docker.build(env.DOCKER_IMAGE_NAME, '-f Dockerfile .')
-                    docker.withRegistry('https://registry-1.docker.io', 'docker-hub-credentials') {
+                    docker.withRegistry('https://registry-1.docker.io', 'dockerhub-credentials') {
                         docker.image(env.DOCKER_IMAGE_NAME).push()
                     }
                 }
